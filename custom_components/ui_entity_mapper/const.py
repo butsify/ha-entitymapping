@@ -49,7 +49,7 @@ class Direction(StrEnum):
 
 # Valid source entity domains per mapping mode
 MODE_VALID_SOURCE_DOMAINS: dict[str, list[str]] = {
-    MappingMode.BOOLEAN_MIRROR: ["binary_sensor", "switch", "light"],
+    MappingMode.BOOLEAN_MIRROR: ["binary_sensor", "switch", "light", "lock"],
     MappingMode.NUMERIC_PASSTHROUGH: ["sensor", "number"],
     MappingMode.NUMERIC_SCALED: ["sensor", "number"],
     MappingMode.NUMERIC_THRESHOLD: ["sensor", "number"],
@@ -58,15 +58,15 @@ MODE_VALID_SOURCE_DOMAINS: dict[str, list[str]] = {
 
 # Valid target entity domains per mapping mode
 MODE_VALID_TARGET_DOMAINS: dict[str, list[str]] = {
-    MappingMode.BOOLEAN_MIRROR: ["switch", "light"],
+    MappingMode.BOOLEAN_MIRROR: ["switch", "light", "lock"],
     MappingMode.NUMERIC_PASSTHROUGH: ["number"],
     MappingMode.NUMERIC_SCALED: ["number", "light"],
-    MappingMode.NUMERIC_THRESHOLD: ["switch", "light"],
+    MappingMode.NUMERIC_THRESHOLD: ["switch", "light", "lock"],
     MappingMode.LIGHT_MIRROR: ["light"],
 }
 
 # All source domains that can appear in the entity selector
-ALL_SOURCE_DOMAINS = ["binary_sensor", "switch", "sensor", "number", "light"]
+ALL_SOURCE_DOMAINS = ["binary_sensor", "switch", "sensor", "number", "light", "lock"]
 
 # All target domains that can appear in the entity selector
-ALL_TARGET_DOMAINS = ["switch", "number", "light"]
+ALL_TARGET_DOMAINS = ["switch", "number", "light", "lock"]

@@ -1,27 +1,8 @@
-{
+﻿{
   "config": {
     "step": {
       "user": {
-        "title": "UI Entity Mapper einrichten",
-        "description": "UI Entity Mapper ermöglicht regelbasierte Zuordnungen zwischen Home-Assistant-Entitäten – vollständig über die Benutzeroberfläche, ohne YAML."
-      }
-    },
-    "abort": {
-      "already_configured": "UI Entity Mapper ist bereits eingerichtet. Verwenden Sie die Schaltfläche 'Konfigurieren', um Zuordnungen zu verwalten."
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "title": "UI Entity Mapper",
-        "menu_options": {
-          "add_mapping": "Zuordnung hinzufügen",
-          "manage_mappings": "Vorhandene Zuordnungen verwalten",
-          "done": "Speichern & schließen"
-        }
-      },
-      "add_mapping": {
-        "title": "Zuordnung hinzufügen — Grundeinstellungen",
+        "title": "Neue Zuordnung — Grundeinstellungen",
         "description": "Quell- und Zielentität auswählen. Die verfügbaren Zuordnungsmodi werden automatisch aus den Entity-Domänen ermittelt.",
         "data": {
           "name": "Name der Zuordnung",
@@ -38,8 +19,8 @@
           "max_retries": "Maximale Anzahl von Wiederholungsversuchen. 0 deaktiviert Wiederholungen, auch wenn eine Verzögerung gesetzt ist."
         }
       },
-      "add_mapping_mode": {
-        "title": "Zuordnung hinzufügen — Modus & Transformation",
+      "mode": {
+        "title": "Neue Zuordnung — Modus & Transformation",
         "description": "Quelldomäne: **{source_domain}** → Zieldomäne: **{target_domain}**. Nur kompatible Modi werden angezeigt.",
         "data": {
           "mode": "Zuordnungsmodus",
@@ -53,25 +34,17 @@
           "mirror_brightness": "Helligkeit spiegeln (Lichtspiegel)",
           "mirror_color_temp": "Farbtemperatur spiegeln (Lichtspiegel)"
         }
-      },
-      "manage_mappings": {
-        "title": "Zuordnungen verwalten",
-        "description": "Eine Zuordnung auswählen, um sie zu bearbeiten, zu löschen, ein-/auszuschalten oder zu duplizieren.",
-        "data": {
-          "mapping_id": "Zuordnung auswählen"
-        }
-      },
-      "mapping_menu": {
-        "title": "Zuordnungsaktionen",
-        "menu_options": {
-          "edit_mapping": "Zuordnung bearbeiten",
-          "delete_mapping": "Zuordnung löschen",
-          "toggle_mapping": "Aktivieren / Deaktivieren",
-          "duplicate_mapping": "Zuordnung duplizieren",
-          "back": "Zurück zum Hauptmenü"
-        }
-      },
-      "edit_mapping": {
+      }
+    },
+    "error": {
+      "no_valid_modes": "Für die gewählte Quell-/Zielkombination gibt es keine kompatiblen Zuordnungsmodi. Bitte wählen Sie ein anderes Entitätenpaar.",
+      "invalid_source_for_mode": "Die Domäne der Quellentität ist mit dem gewählten Modus nicht kompatibel.",
+      "invalid_target_for_mode": "Die Domäne der Zielentität ist mit dem gewählten Modus nicht kompatibel."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
         "title": "Zuordnung bearbeiten — Grundeinstellungen",
         "description": "Quell- und Zielentität, Richtung und Wiederholungseinstellungen ändern.",
         "data": {
@@ -85,7 +58,7 @@
           "max_retries": "Maximale Wiederholungsversuche (0 = keine Wiederholung)"
         }
       },
-      "edit_mapping_mode": {
+      "mode": {
         "title": "Zuordnung bearbeiten — Modus & Transformation",
         "description": "Quelldomäne: **{source_domain}** → Zieldomäne: **{target_domain}**.",
         "data": {
@@ -100,17 +73,12 @@
           "mirror_brightness": "Helligkeit spiegeln (Lichtspiegel)",
           "mirror_color_temp": "Farbtemperatur spiegeln (Lichtspiegel)"
         }
-      },
-      "delete_mapping": {
-        "title": "Zuordnung löschen",
-        "description": "Möchten Sie die Zuordnung **{name}** unwiderruflich löschen?"
       }
     },
     "error": {
       "no_valid_modes": "Für die gewählte Quell-/Zielkombination gibt es keine kompatiblen Zuordnungsmodi. Bitte wählen Sie ein anderes Entitätenpaar.",
       "invalid_source_for_mode": "Die Domäne der Quellentität ist mit dem gewählten Modus nicht kompatibel.",
-      "invalid_target_for_mode": "Die Domäne der Zielentität ist mit dem gewählten Modus nicht kompatibel.",
-      "no_mappings": "Es wurden noch keine Zuordnungen erstellt. Bitte zuerst 'Zuordnung hinzufügen' verwenden."
+      "invalid_target_for_mode": "Die Domäne der Zielentität ist mit dem gewählten Modus nicht kompatibel."
     }
   },
   "entity": {
@@ -182,7 +150,7 @@
     },
     "import_mappings": {
       "name": "Zuordnungen importieren",
-      "description": "Eine oder mehrere Zuordnungskonfigurationen aus einer Liste importieren. Vorhandene Zuordnungen bleiben erhalten.",
+      "description": "Eine oder mehrere Zuordnungskonfigurationen aus einer Liste importieren.",
       "fields": {
         "mappings": {
           "name": "Zuordnungen",

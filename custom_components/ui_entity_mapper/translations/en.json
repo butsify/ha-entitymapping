@@ -1,27 +1,8 @@
-{
+﻿{
   "config": {
     "step": {
       "user": {
-        "title": "Set up UI Entity Mapper",
-        "description": "UI Entity Mapper lets you create rule-based mappings between Home Assistant entities. No YAML required — everything is configured through the UI."
-      }
-    },
-    "abort": {
-      "already_configured": "UI Entity Mapper is already set up. Use the configure button to manage mappings."
-    }
-  },
-  "options": {
-    "step": {
-      "init": {
-        "title": "UI Entity Mapper",
-        "menu_options": {
-          "add_mapping": "Add mapping",
-          "manage_mappings": "Manage existing mappings",
-          "done": "Save & close"
-        }
-      },
-      "add_mapping": {
-        "title": "Add Mapping — Basic Settings",
+        "title": "New Mapping — Basic Settings",
         "description": "Select the source and target entities. The available mapping modes are determined automatically from the entity domains.",
         "data": {
           "name": "Mapping name",
@@ -38,8 +19,8 @@
           "max_retries": "Maximum number of retry attempts. 0 disables retries even if a delay is set."
         }
       },
-      "add_mapping_mode": {
-        "title": "Add Mapping — Mode & Transform",
+      "mode": {
+        "title": "New Mapping — Mode & Transform",
         "description": "Source domain: **{source_domain}** → Target domain: **{target_domain}**. Only compatible modes are shown.",
         "data": {
           "mode": "Mapping mode",
@@ -53,25 +34,17 @@
           "mirror_brightness": "Mirror brightness (light mirror)",
           "mirror_color_temp": "Mirror colour temperature (light mirror)"
         }
-      },
-      "manage_mappings": {
-        "title": "Manage Mappings",
-        "description": "Select a mapping to edit, delete, toggle, or duplicate.",
-        "data": {
-          "mapping_id": "Select mapping"
-        }
-      },
-      "mapping_menu": {
-        "title": "Mapping Actions",
-        "menu_options": {
-          "edit_mapping": "Edit mapping",
-          "delete_mapping": "Delete mapping",
-          "toggle_mapping": "Toggle enable / disable",
-          "duplicate_mapping": "Duplicate mapping",
-          "back": "Back to main menu"
-        }
-      },
-      "edit_mapping": {
+      }
+    },
+    "error": {
+      "no_valid_modes": "No compatible mapping modes exist for the selected source / target combination. Please choose a different pair of entities.",
+      "invalid_source_for_mode": "The source entity domain is not compatible with the selected mode.",
+      "invalid_target_for_mode": "The target entity domain is not compatible with the selected mode."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
         "title": "Edit Mapping — Basic Settings",
         "description": "Modify the source and target entities, direction, and retry settings.",
         "data": {
@@ -85,7 +58,7 @@
           "max_retries": "Maximum retry attempts (0 = no retry)"
         }
       },
-      "edit_mapping_mode": {
+      "mode": {
         "title": "Edit Mapping — Mode & Transform",
         "description": "Source domain: **{source_domain}** → Target domain: **{target_domain}**.",
         "data": {
@@ -100,17 +73,12 @@
           "mirror_brightness": "Mirror brightness (light mirror)",
           "mirror_color_temp": "Mirror colour temperature (light mirror)"
         }
-      },
-      "delete_mapping": {
-        "title": "Delete Mapping",
-        "description": "Are you sure you want to permanently delete the mapping **{name}**? This action cannot be undone."
       }
     },
     "error": {
       "no_valid_modes": "No compatible mapping modes exist for the selected source / target combination. Please choose a different pair of entities.",
       "invalid_source_for_mode": "The source entity domain is not compatible with the selected mode.",
-      "invalid_target_for_mode": "The target entity domain is not compatible with the selected mode.",
-      "no_mappings": "No mappings have been configured yet. Use 'Add mapping' first."
+      "invalid_target_for_mode": "The target entity domain is not compatible with the selected mode."
     }
   },
   "entity": {
@@ -182,7 +150,7 @@
     },
     "import_mappings": {
       "name": "Import Mappings",
-      "description": "Import one or more mapping configurations from a list. Existing mappings are preserved.",
+      "description": "Import one or more mapping configurations from a list.",
       "fields": {
         "mappings": {
           "name": "Mappings",

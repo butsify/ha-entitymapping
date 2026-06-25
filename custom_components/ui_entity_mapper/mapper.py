@@ -110,13 +110,22 @@ def compute_service_call(
 def _boolean_mirror(
     source_state: str, target_domain: str, target_entity_id: str, transform: TransformConfig
 ) -> ServiceCall | None:
-    """Map source ON/OFF to target turn_on/turn_off."""
-    is_on = source_state == "on"
+    """Map source ON/OFF (or locked/unlocked) to target turn_on/turn_off or lock/unlock."""
+    # Normalise lock source states to boolean
+    if source_state == "locked":
+        is_on = True
+    elif source_state == "unlocked":
+        is_on = False
+    else:
+        is_on = source_state == "on"
     if transform.get("invert", False):
         is_on = not is_on
-    service = "turn_on" if is_on else "turn_off"
     if target_domain in ("switch", "light"):
+        service = "turn_on" if is_on else "turn_off"
         return (target_domain, service, {"entity_id": target_entity_id})
+    if target_domain == "lock":
+        service = "lock" if is_on else "unlock"
+        return ("lock", service, {"entity_id": target_entity_id})
     return None
 
 
@@ -182,10 +191,13 @@ def _numeric_threshold(
 
     threshold = float(transform.get("threshold", 50))
     is_on = val >= threshold
-    service = "turn_on" if is_on else "turn_off"
 
     if target_domain in ("switch", "light"):
+        service = "turn_on" if is_on else "turn_off"
         return (target_domain, service, {"entity_id": target_entity_id})
+    if target_domain == "lock":
+        service = "lock" if is_on else "unlock"
+        return ("lock", service, {"entity_id": target_entity_id})
     return None
 
 
@@ -236,8 +248,11 @@ def check_boolean_target_reached(
 ) -> bool:
     """Return True if the target entity currently matches the expected on/off state."""
     state = hass.states.get(entity_id)
-    if state is None or state.state in ("unknown", "unavailable"):
+    if state is None or state.state in ("unknown", "unavailable", "jammed"):
         return False
+    domain = entity_id.split(".")[0]
+    if domain == "lock":
+        return (state.state == "locked") == expected_on
     return (state.state == "on") == expected_on
 
 

@@ -35,7 +35,7 @@ from .mapper import (
     compute_light_mirror_call,
     compute_service_call,
 )
-from .storage import MappingConfig, MappingStorage
+from .storage import MappingConfig
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -53,17 +53,16 @@ class MappingStatus:
 
 
 class MappingManager:
-    """Manages all mapping listeners, loop prevention, and retry scheduling."""
+    """Manages the single mapping listener, loop prevention, and retry scheduling."""
 
     def __init__(
         self,
         hass: HomeAssistant,
-        storage: MappingStorage,
-        entry_id: str,
+        entry: Any,
     ) -> None:
         self.hass = hass
-        self.storage = storage
-        self.entry_id = entry_id
+        self._entry = entry
+        self.entry_id = entry.entry_id
 
         # Unsubscribe callables for active HA state listeners
         self._unsub_listeners: list[Callable[[], None]] = []
@@ -88,27 +87,24 @@ class MappingManager:
     # ------------------------------------------------------------------
 
     async def async_setup(self) -> None:
-        """Load storage and register HA state listeners."""
-        await self.storage.async_load()
+        """Register HA state listeners for the mapping."""
+        mapping = self.get_mapping()
+        self._mapping_status.setdefault(mapping["id"], MappingStatus())
         self._register_listeners()
 
     def _register_listeners(self) -> None:
-        """(Re-)register state-change listeners for all active mappings."""
+        """(Re-)register state-change listeners for the mapping."""
         for unsub in self._unsub_listeners:
             unsub()
         self._unsub_listeners.clear()
 
-        # Ensure a status object exists for every mapping
-        for mapping in self.storage.get_mappings():
-            self._mapping_status.setdefault(mapping["id"], MappingStatus())
+        mapping = self.get_mapping()
+        self._mapping_status.setdefault(mapping["id"], MappingStatus())
 
-        sources: set[str] = set()
+        sources: set[str] = {mapping["source_entity"]}
         targets_bidir: set[str] = set()
-
-        for mapping in self.storage.get_mappings():
-            sources.add(mapping["source_entity"])
-            if mapping["direction"] == Direction.BIDIRECTIONAL:
-                targets_bidir.add(mapping["target_entity"])
+        if mapping["direction"] == Direction.BIDIRECTIONAL:
+            targets_bidir.add(mapping["target_entity"])
 
         if sources:
             unsub = async_track_state_change_event(
@@ -146,7 +142,7 @@ class MappingManager:
         if new_state is None or new_state.state in ("unknown", "unavailable"):
             return
 
-        for mapping in self.storage.get_mappings():
+        for mapping in [self.get_mapping()]:
             if mapping["source_entity"] == entity_id:
                 self.hass.async_create_task(
                     self._process_mapping(mapping, new_state, reverse=False)
@@ -161,7 +157,7 @@ class MappingManager:
         if new_state is None or new_state.state in ("unknown", "unavailable"):
             return
 
-        for mapping in self.storage.get_mappings():
+        for mapping in [self.get_mapping()]:
             if (
                 mapping["target_entity"] == entity_id
                 and mapping["direction"] == Direction.BIDIRECTIONAL
@@ -325,7 +321,11 @@ class MappingManager:
 
         if mode in (MappingMode.BOOLEAN_MIRROR, MappingMode.NUMERIC_THRESHOLD,
                     MappingMode.LIGHT_MIRROR):
-            expected_on = service == "turn_on"
+            # lock targets use "lock"/"unlock" instead of "turn_on"/"turn_off"
+            if target_entity_id.split(".")[0] == "lock":
+                expected_on = service == "lock"
+            else:
+                expected_on = service == "turn_on"
             return check_boolean_target_reached(self.hass, target_entity_id, expected_on)
 
         if mode in (MappingMode.NUMERIC_PASSTHROUGH, MappingMode.NUMERIC_SCALED):
@@ -436,26 +436,28 @@ class MappingManager:
     # ------------------------------------------------------------------
 
     async def enable_mapping(self, mapping_id: str) -> None:
-        """Enable a mapping and persist the change."""
-        await self.storage.update_mapping(mapping_id, {"enabled": True})
+        """Enable the mapping and persist via config entry."""
+        new_data = {**self._entry.data, "enabled": True}
+        self.hass.config_entries.async_update_entry(self._entry, data=new_data)
         async_dispatcher_send(
             self.hass,
             SIGNAL_MAPPING_UPDATED.format(mapping_id=mapping_id),
         )
 
     async def disable_mapping(self, mapping_id: str) -> None:
-        """Disable a mapping, cancel pending retries, and persist."""
+        """Disable the mapping, cancel pending retries, and persist."""
         self._cancel_pending_retry(mapping_id)
-        await self.storage.update_mapping(mapping_id, {"enabled": False})
+        new_data = {**self._entry.data, "enabled": False}
+        self.hass.config_entries.async_update_entry(self._entry, data=new_data)
         async_dispatcher_send(
             self.hass,
             SIGNAL_MAPPING_UPDATED.format(mapping_id=mapping_id),
         )
 
     async def run_mapping_once(self, mapping_id: str) -> None:
-        """Manually trigger a mapping once using the current source state."""
-        mapping = self.storage.get_mapping(mapping_id)
-        if mapping is None:
+        """Manually trigger the mapping once using the current source state."""
+        mapping = self.get_mapping()
+        if mapping["id"] != mapping_id:
             _LOGGER.error("run_mapping_once: mapping %s not found", mapping_id)
             return
         source_state = self.hass.states.get(mapping["source_entity"])
@@ -474,5 +476,9 @@ class MappingManager:
         return self._mapping_status.setdefault(mapping_id, MappingStatus())
 
     def get_all_mappings(self) -> list[MappingConfig]:
-        """Return all mappings from storage."""
-        return self.storage.get_mappings()
+        """Return the single mapping for this entry."""
+        return [self.get_mapping()]
+
+    def get_mapping(self) -> MappingConfig:
+        """Return the current mapping config from the live config entry."""
+        return dict(self._entry.data)  # type: ignore[return-value]
