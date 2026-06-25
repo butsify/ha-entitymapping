@@ -83,11 +83,11 @@ def _base_mapping_schema(defaults: dict[str, Any]) -> vol.Schema:
                     options=[
                         selector.SelectOptionDict(
                             value=Direction.UNIDIRECTIONAL,
-                            label="Unidirectional (source â†’ target)",
+                            label="Unidirectional (source -> target)",
                         ),
                         selector.SelectOptionDict(
                             value=Direction.BIDIRECTIONAL,
-                            label="Bidirectional (source â†” target)",
+                            label="Bidirectional (source <-> target)",
                         ),
                     ],
                     mode=selector.SelectSelectorMode.LIST,
