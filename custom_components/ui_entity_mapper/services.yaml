@@ -1,0 +1,55 @@
+reload:
+  name: Reload
+  description: Reload the UI Entity Mapper integration, re-reading all mapping configurations from storage.
+
+enable_mapping:
+  name: Enable Mapping
+  description: Enable a mapping by its unique UUID.
+  fields:
+    mapping_id:
+      name: Mapping ID
+      description: The UUID of the mapping to enable (visible in the diagnostic sensor or export response).
+      required: true
+      selector:
+        text:
+
+disable_mapping:
+  name: Disable Mapping
+  description: Disable a mapping by its unique UUID. Any pending retry for that mapping is cancelled.
+  fields:
+    mapping_id:
+      name: Mapping ID
+      description: The UUID of the mapping to disable.
+      required: true
+      selector:
+        text:
+
+run_mapping_once:
+  name: Run Mapping Once
+  description: >
+    Manually trigger a mapping once using the current state of the source entity.
+    Loop-guard is bypassed so the execution always proceeds.
+  fields:
+    mapping_id:
+      name: Mapping ID
+      description: The UUID of the mapping to run.
+      required: true
+      selector:
+        text:
+
+export_mappings:
+  name: Export Mappings
+  description: Return all mapping configurations as a JSON-serialisable service response.
+
+import_mappings:
+  name: Import Mappings
+  description: >
+    Import one or more mapping configurations from a list of objects.
+    Existing mappings are preserved; a reload is triggered after import.
+  fields:
+    mappings:
+      name: Mappings
+      description: List of mapping configuration objects. Each object follows the standard mapping schema (id is optional — one will be generated if omitted).
+      required: true
+      selector:
+        object:

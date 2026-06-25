@@ -1,0 +1,194 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "UI Entity Mapper einrichten",
+        "description": "UI Entity Mapper ermöglicht regelbasierte Zuordnungen zwischen Home-Assistant-Entitäten – vollständig über die Benutzeroberfläche, ohne YAML."
+      }
+    },
+    "abort": {
+      "already_configured": "UI Entity Mapper ist bereits eingerichtet. Verwenden Sie die Schaltfläche 'Konfigurieren', um Zuordnungen zu verwalten."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "UI Entity Mapper",
+        "menu_options": {
+          "add_mapping": "Zuordnung hinzufügen",
+          "manage_mappings": "Vorhandene Zuordnungen verwalten",
+          "done": "Speichern & schließen"
+        }
+      },
+      "add_mapping": {
+        "title": "Zuordnung hinzufügen — Grundeinstellungen",
+        "description": "Quell- und Zielentität auswählen. Die verfügbaren Zuordnungsmodi werden automatisch aus den Entity-Domänen ermittelt.",
+        "data": {
+          "name": "Name der Zuordnung",
+          "source_entity": "Quellentität",
+          "target_entity": "Zielentität",
+          "direction": "Richtung",
+          "enabled": "Aktiviert",
+          "prevent_loop": "Rückkopplungsschleifen verhindern (empfohlen)",
+          "retry_delay_seconds": "Wiederholungsverzögerung in Sekunden (0 = keine Wiederholung)",
+          "max_retries": "Maximale Wiederholungsversuche (0 = keine Wiederholung)"
+        },
+        "data_description": {
+          "retry_delay_seconds": "Wenn die Zielentität den gewünschten Zustand nicht erreicht, nach dieser Anzahl Sekunden erneut versuchen.",
+          "max_retries": "Maximale Anzahl von Wiederholungsversuchen. 0 deaktiviert Wiederholungen, auch wenn eine Verzögerung gesetzt ist."
+        }
+      },
+      "add_mapping_mode": {
+        "title": "Zuordnung hinzufügen — Modus & Transformation",
+        "description": "Quelldomäne: **{source_domain}** → Zieldomäne: **{target_domain}**. Nur kompatible Modi werden angezeigt.",
+        "data": {
+          "mode": "Zuordnungsmodus",
+          "threshold": "Schwellwert (numerischer Schwellwertmodus)",
+          "input_min": "Eingabeminimum (Skalierung)",
+          "input_max": "Eingabemaximum (Skalierung)",
+          "output_min": "Ausgabeminimum (Skalierung)",
+          "output_max": "Ausgabemaximum (Skalierung)",
+          "invert": "Ausgabe invertieren",
+          "round": "Auf nächste ganze Zahl runden",
+          "mirror_brightness": "Helligkeit spiegeln (Lichtspiegel)",
+          "mirror_color_temp": "Farbtemperatur spiegeln (Lichtspiegel)"
+        }
+      },
+      "manage_mappings": {
+        "title": "Zuordnungen verwalten",
+        "description": "Eine Zuordnung auswählen, um sie zu bearbeiten, zu löschen, ein-/auszuschalten oder zu duplizieren.",
+        "data": {
+          "mapping_id": "Zuordnung auswählen"
+        }
+      },
+      "mapping_menu": {
+        "title": "Zuordnungsaktionen",
+        "menu_options": {
+          "edit_mapping": "Zuordnung bearbeiten",
+          "delete_mapping": "Zuordnung löschen",
+          "toggle_mapping": "Aktivieren / Deaktivieren",
+          "duplicate_mapping": "Zuordnung duplizieren",
+          "back": "Zurück zum Hauptmenü"
+        }
+      },
+      "edit_mapping": {
+        "title": "Zuordnung bearbeiten — Grundeinstellungen",
+        "description": "Quell- und Zielentität, Richtung und Wiederholungseinstellungen ändern.",
+        "data": {
+          "name": "Name der Zuordnung",
+          "source_entity": "Quellentität",
+          "target_entity": "Zielentität",
+          "direction": "Richtung",
+          "enabled": "Aktiviert",
+          "prevent_loop": "Rückkopplungsschleifen verhindern",
+          "retry_delay_seconds": "Wiederholungsverzögerung in Sekunden (0 = keine Wiederholung)",
+          "max_retries": "Maximale Wiederholungsversuche (0 = keine Wiederholung)"
+        }
+      },
+      "edit_mapping_mode": {
+        "title": "Zuordnung bearbeiten — Modus & Transformation",
+        "description": "Quelldomäne: **{source_domain}** → Zieldomäne: **{target_domain}**.",
+        "data": {
+          "mode": "Zuordnungsmodus",
+          "threshold": "Schwellwert (numerischer Schwellwertmodus)",
+          "input_min": "Eingabeminimum (Skalierung)",
+          "input_max": "Eingabemaximum (Skalierung)",
+          "output_min": "Ausgabeminimum (Skalierung)",
+          "output_max": "Ausgabemaximum (Skalierung)",
+          "invert": "Ausgabe invertieren",
+          "round": "Auf nächste ganze Zahl runden",
+          "mirror_brightness": "Helligkeit spiegeln (Lichtspiegel)",
+          "mirror_color_temp": "Farbtemperatur spiegeln (Lichtspiegel)"
+        }
+      },
+      "delete_mapping": {
+        "title": "Zuordnung löschen",
+        "description": "Möchten Sie die Zuordnung **{name}** unwiderruflich löschen?"
+      }
+    },
+    "error": {
+      "no_valid_modes": "Für die gewählte Quell-/Zielkombination gibt es keine kompatiblen Zuordnungsmodi. Bitte wählen Sie ein anderes Entitätenpaar.",
+      "invalid_source_for_mode": "Die Domäne der Quellentität ist mit dem gewählten Modus nicht kompatibel.",
+      "invalid_target_for_mode": "Die Domäne der Zielentität ist mit dem gewählten Modus nicht kompatibel.",
+      "no_mappings": "Es wurden noch keine Zuordnungen erstellt. Bitte zuerst 'Zuordnung hinzufügen' verwenden."
+    }
+  },
+  "entity": {
+    "switch": {
+      "mapping_enabled": {
+        "name": "Aktiviert"
+      }
+    },
+    "sensor": {
+      "mapping_last_result": {
+        "name": "Letztes Ergebnis"
+      },
+      "mapping_success_count": {
+        "name": "Erfolge"
+      },
+      "mapping_failure_count": {
+        "name": "Fehler"
+      }
+    },
+    "text": {
+      "mapping_last_error": {
+        "name": "Letzter Fehler"
+      }
+    },
+    "button": {
+      "mapping_run_once": {
+        "name": "Einmal ausführen"
+      }
+    }
+  },
+  "services": {
+    "reload": {
+      "name": "Neu laden",
+      "description": "Integration neu laden und alle Zuordnungskonfigurationen neu einlesen."
+    },
+    "enable_mapping": {
+      "name": "Zuordnung aktivieren",
+      "description": "Eine Zuordnung anhand ihrer eindeutigen ID aktivieren.",
+      "fields": {
+        "mapping_id": {
+          "name": "Zuordnungs-ID",
+          "description": "Die UUID der zu aktivierenden Zuordnung."
+        }
+      }
+    },
+    "disable_mapping": {
+      "name": "Zuordnung deaktivieren",
+      "description": "Eine Zuordnung anhand ihrer eindeutigen ID deaktivieren. Ausstehende Wiederholungsversuche werden abgebrochen.",
+      "fields": {
+        "mapping_id": {
+          "name": "Zuordnungs-ID",
+          "description": "Die UUID der zu deaktivierenden Zuordnung."
+        }
+      }
+    },
+    "run_mapping_once": {
+      "name": "Zuordnung einmal ausführen",
+      "description": "Eine Zuordnung manuell mit dem aktuellen Zustand der Quellentität ausführen.",
+      "fields": {
+        "mapping_id": {
+          "name": "Zuordnungs-ID",
+          "description": "Die UUID der auszuführenden Zuordnung."
+        }
+      }
+    },
+    "export_mappings": {
+      "name": "Zuordnungen exportieren",
+      "description": "Alle Zuordnungskonfigurationen als JSON-serialisierbares Service-Ergebnis zurückgeben."
+    },
+    "import_mappings": {
+      "name": "Zuordnungen importieren",
+      "description": "Eine oder mehrere Zuordnungskonfigurationen aus einer Liste importieren. Vorhandene Zuordnungen bleiben erhalten.",
+      "fields": {
+        "mappings": {
+          "name": "Zuordnungen",
+          "description": "Liste der zu importierenden Zuordnungskonfigurationsobjekte."
+        }
+      }
+    }
+  }
+}
