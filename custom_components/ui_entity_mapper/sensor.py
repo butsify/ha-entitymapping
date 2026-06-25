@@ -54,8 +54,8 @@ class _MappingBaseSensor(SensorEntity):
         self._attr_unique_id = f"{DOMAIN}_{self._mapping_id}_{key}"
         self._attr_name = f"{mapping['name']} — {name_suffix}"
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry_id)},
-            name="UI Entity Mapper",
+            identifiers={(DOMAIN, mapping["id"])},
+            name=mapping["name"],
             manufacturer="UI Entity Mapper",
             model="Mapping Engine",
             entry_type=DeviceEntryType.SERVICE,

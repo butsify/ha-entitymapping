@@ -49,8 +49,8 @@ class MappingEnabledSwitch(SwitchEntity):
         self._attr_unique_id = f"{DOMAIN}_{self._mapping_id}_enabled"
         self._attr_name = f"{mapping['name']} — Enabled"
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry_id)},
-            name="UI Entity Mapper",
+            identifiers={(DOMAIN, mapping["id"])},
+            name=mapping["name"],
             manufacturer="UI Entity Mapper",
             model="Mapping Engine",
             entry_type=DeviceEntryType.SERVICE,

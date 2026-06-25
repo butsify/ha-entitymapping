@@ -80,7 +80,7 @@ def compute_service_call(
     target_domain = target_entity_id.split(".")[0]
 
     if mode == MappingMode.BOOLEAN_MIRROR:
-        return _boolean_mirror(source_state, target_domain, target_entity_id)
+        return _boolean_mirror(source_state, target_domain, target_entity_id, transform)
 
     if mode == MappingMode.NUMERIC_PASSTHROUGH:
         return _numeric_passthrough(source_state, target_entity_id)
@@ -108,10 +108,12 @@ def compute_service_call(
 
 
 def _boolean_mirror(
-    source_state: str, target_domain: str, target_entity_id: str
+    source_state: str, target_domain: str, target_entity_id: str, transform: TransformConfig
 ) -> ServiceCall | None:
     """Map source ON/OFF to target turn_on/turn_off."""
     is_on = source_state == "on"
+    if transform.get("invert", False):
+        is_on = not is_on
     service = "turn_on" if is_on else "turn_off"
     if target_domain in ("switch", "light"):
         return (target_domain, service, {"entity_id": target_entity_id})

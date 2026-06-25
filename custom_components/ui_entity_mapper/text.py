@@ -53,8 +53,8 @@ class MappingLastErrorText(TextEntity):
         self._attr_name = f"{mapping['name']} — Last Error"
         self._attr_native_value = ""
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry_id)},
-            name="UI Entity Mapper",
+            identifiers={(DOMAIN, mapping["id"])},
+            name=mapping["name"],
             manufacturer="UI Entity Mapper",
             model="Mapping Engine",
             entry_type=DeviceEntryType.SERVICE,
