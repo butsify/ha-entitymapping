@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "New Mapping — Basic Settings",
-        "description": "Select the source and target entities. The available mapping modes are determined automatically from the entity domains.",
+        "title": "New Mapping",
+        "description": "Select source/target entities and a mapping mode. Only modes compatible with the chosen domains are shown after the first validation.",
         "data": {
           "name": "Mapping name",
           "source_entity": "Source entity",
@@ -12,18 +12,12 @@
           "enabled": "Enabled",
           "prevent_loop": "Prevent feedback loops (recommended)",
           "retry_delay_seconds": "Retry delay in seconds (0 = no retry)",
-          "max_retries": "Maximum retry attempts (0 = no retry)"
+          "max_retries": "Maximum retry attempts (0 = no retry)",
+          "mode": "Mapping mode"
         },
         "data_description": {
           "retry_delay_seconds": "If the target does not reach the desired state, retry after this many seconds.",
           "max_retries": "Maximum number of retry attempts. 0 disables retries even if a delay is set."
-        }
-      },
-      "mode": {
-        "title": "New Mapping — Select Mode",
-        "description": "Source domain: **{source_domain}** -> Target domain: **{target_domain}**. Only compatible modes are shown.",
-        "data": {
-          "mode": "Mapping mode"
         }
       },
       "transform": {
@@ -51,8 +45,8 @@
   "options": {
     "step": {
       "init": {
-        "title": "Edit Mapping — Basic Settings",
-        "description": "Modify the source and target entities, direction, and retry settings.",
+        "title": "Edit Mapping",
+        "description": "Modify settings. If you change the entities, re-select a compatible mode.",
         "data": {
           "name": "Mapping name",
           "source_entity": "Source entity",
@@ -61,13 +55,7 @@
           "enabled": "Enabled",
           "prevent_loop": "Prevent feedback loops",
           "retry_delay_seconds": "Retry delay in seconds (0 = no retry)",
-          "max_retries": "Maximum retry attempts (0 = no retry)"
-        }
-      },
-      "mode": {
-        "title": "Edit Mapping — Select Mode",
-        "description": "Source domain: **{source_domain}** -> Target domain: **{target_domain}**.",
-        "data": {
+          "max_retries": "Maximum retry attempts (0 = no retry)",
           "mode": "Mapping mode"
         }
       },

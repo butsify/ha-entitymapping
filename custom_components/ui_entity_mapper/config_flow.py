@@ -58,8 +58,13 @@ def _validate_mode_compat(
     return None
 
 
-def _base_mapping_schema(defaults: dict[str, Any]) -> vol.Schema:
-    """Build the voluptuous schema for step 1 (base mapping settings)."""
+def _base_mapping_schema(defaults: dict[str, Any], mode_options: list | None = None) -> vol.Schema:
+    """Build the voluptuous schema for step 1 (base mapping settings + mode)."""
+    if mode_options is None:
+        mode_options = [
+            selector.SelectOptionDict(value=m, label=m.replace("_", " ").title())
+            for m in MappingMode
+        ]
     return vol.Schema(
         {
             vol.Required(
@@ -117,19 +122,9 @@ def _base_mapping_schema(defaults: dict[str, Any]) -> vol.Schema:
                     mode=selector.NumberSelectorMode.BOX,
                 )
             ),
-        }
-    )
-
-
-def _mode_only_schema(valid_modes: list[str], mode_default: str) -> vol.Schema:
-    """Build the schema for the mode-selection step (mode selector only)."""
-    mode_options = [
-        selector.SelectOptionDict(value=m, label=m.replace("_", " ").title())
-        for m in valid_modes
-    ]
-    return vol.Schema(
-        {
-            vol.Required("mode", default=mode_default): selector.SelectSelector(
+            vol.Required(
+                "mode", default=defaults.get("mode", MappingMode.BOOLEAN_MIRROR)
+            ): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=mode_options,
                     mode=selector.SelectSelectorMode.LIST,
@@ -228,85 +223,68 @@ class UiEntityMapperConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> dict[str, Any]:
-        """Step 1: collect base mapping settings."""
+        """Step 1: collect base mapping settings + mode."""
         errors: dict[str, str] = {}
+        defaults: dict[str, Any] = {}
+        mode_options = None  # None = show all modes
+
         if user_input is not None:
-            self._form_data = {
-                "id": str(uuid.uuid4()),
-                "name": user_input["name"],
-                "source_entity": user_input["source_entity"],
-                "target_entity": user_input["target_entity"],
-                "direction": user_input.get("direction", Direction.UNIDIRECTIONAL),
-                "enabled": bool(user_input.get("enabled", True)),
-                "prevent_loop": bool(user_input.get("prevent_loop", True)),
-                "retry_delay_seconds": float(user_input.get("retry_delay_seconds", 0)),
-                "max_retries": int(user_input.get("max_retries", 1)),
-                "debounce_ms": 0,
-                "throttle_ms": 0,
-            }
-            return await self.async_step_mode()
+            source_domain = _get_entity_domain(user_input.get("source_entity", ""))
+            target_domain = _get_entity_domain(user_input.get("target_entity", ""))
+            mode = user_input.get("mode", "")
+            err = _validate_mode_compat(source_domain, target_domain, mode)
+            if err:
+                errors["mode"] = err
+                defaults = dict(user_input)
+                valid_modes = _get_valid_modes(source_domain, target_domain)
+                if valid_modes:
+                    mode_options = [
+                        selector.SelectOptionDict(value=m, label=m.replace("_", " ").title())
+                        for m in valid_modes
+                    ]
+            else:
+                self._form_data = {
+                    "id": str(uuid.uuid4()),
+                    "name": user_input["name"],
+                    "source_entity": user_input["source_entity"],
+                    "target_entity": user_input["target_entity"],
+                    "direction": user_input.get("direction", Direction.UNIDIRECTIONAL),
+                    "enabled": bool(user_input.get("enabled", True)),
+                    "prevent_loop": bool(user_input.get("prevent_loop", True)),
+                    "retry_delay_seconds": float(user_input.get("retry_delay_seconds", 0)),
+                    "max_retries": int(user_input.get("max_retries", 1)),
+                    "mode": mode,
+                    "debounce_ms": 0,
+                    "throttle_ms": 0,
+                }
+                if mode == MappingMode.NUMERIC_PASSTHROUGH:
+                    full_config = {**self._form_data, "transform": {}}
+                    return self.async_create_entry(title=full_config["name"], data=full_config)
+                return await self.async_step_transform()
+
         return self.async_show_form(
             step_id="user",
-            data_schema=_base_mapping_schema({}),
+            data_schema=_base_mapping_schema(defaults, mode_options),
             errors=errors,
         )
 
     async def async_step_mode(
         self, user_input: dict[str, Any] | None = None
     ) -> dict[str, Any]:
-        """Step 2: select the mapping mode."""
-        errors: dict[str, str] = {}
-        source_domain = _get_entity_domain(self._form_data.get("source_entity", ""))
-        target_domain = _get_entity_domain(self._form_data.get("target_entity", ""))
-        valid_modes = _get_valid_modes(source_domain, target_domain)
-
-        if not valid_modes:
-            return self.async_show_form(
-                step_id="mode",
-                data_schema=vol.Schema({}),
-                errors={"base": "no_valid_modes"},
-            )
-
-        if user_input is not None:
-            mode = user_input["mode"]
-            err = _validate_mode_compat(source_domain, target_domain, mode)
-            if err:
-                errors["mode"] = err
-            else:
-                self._form_data["mode"] = mode
-                if mode == MappingMode.NUMERIC_PASSTHROUGH:
-                    full_config = {**self._form_data, "transform": {}}
-                    return self.async_create_entry(title=full_config["name"], data=full_config)
-                # Show transform form directly — avoids unreliable step-chaining
-                schema = _transform_schema_for_mode(mode, {})
-                return self.async_show_form(
-                    step_id="transform",
-                    data_schema=schema,
-                    description_placeholders={"mode_label": mode.replace("_", " ").title()},
-                )
-
-        return self.async_show_form(
-            step_id="mode",
-            data_schema=_mode_only_schema(valid_modes, valid_modes[0]),
-            description_placeholders={
-                "source_domain": source_domain,
-                "target_domain": target_domain,
-            },
-            errors=errors,
-        )
+        """Step 2 (legacy, no longer used — kept for in-flight flows)."""
+        return await self.async_step_transform()
 
     async def async_step_transform(
         self, user_input: dict[str, Any] | None = None
     ) -> dict[str, Any]:
-        """Step 3: handle transform form submission."""
+        """Step 2: configure mode-specific transform parameters."""
         mode = self._form_data.get("mode", MappingMode.BOOLEAN_MIRROR)
+        schema = _transform_schema_for_mode(mode, {})
 
         if user_input is not None:
             full_config = {**self._form_data, "transform": _extract_transform(mode, user_input)}
             return self.async_create_entry(title=full_config["name"], data=full_config)
 
-        # Fallback: show form if navigated to directly
-        schema = _transform_schema_for_mode(mode, {})
         return self.async_show_form(
             step_id="transform",
             data_schema=schema,
@@ -339,87 +317,67 @@ class UiEntityMapperOptionsFlow(OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> dict[str, Any]:
-        """Step 1: edit base mapping settings (pre-filled from entry.data)."""
+        """Step 1: edit base mapping settings + mode (pre-filled from entry.data)."""
         defaults = dict(self._entry.data)
         errors: dict[str, str] = {}
+        mode_options = None  # None = show all modes
 
         if user_input is not None:
-            self._form_data = {
-                "id": self._entry.data.get("id", str(uuid.uuid4())),
-                "name": user_input["name"],
-                "source_entity": user_input["source_entity"],
-                "target_entity": user_input["target_entity"],
-                "direction": user_input.get("direction", Direction.UNIDIRECTIONAL),
-                "enabled": bool(user_input.get("enabled", True)),
-                "prevent_loop": bool(user_input.get("prevent_loop", True)),
-                "retry_delay_seconds": float(user_input.get("retry_delay_seconds", 0)),
-                "max_retries": int(user_input.get("max_retries", 1)),
-                "debounce_ms": 0,
-                "throttle_ms": 0,
-            }
-            return await self.async_step_mode()
-
-        return self.async_show_form(
-            step_id="init",
-            data_schema=_base_mapping_schema(defaults),
-            errors=errors,
-        )
-
-    async def async_step_mode(
-        self, user_input: dict[str, Any] | None = None
-    ) -> dict[str, Any]:
-        """Step 2: select mapping mode (pre-filled from entry.data)."""
-        errors: dict[str, str] = {}
-        source_domain = _get_entity_domain(self._form_data.get("source_entity", ""))
-        target_domain = _get_entity_domain(self._form_data.get("target_entity", ""))
-        valid_modes = _get_valid_modes(source_domain, target_domain)
-        mode_default = self._entry.data.get("mode", valid_modes[0] if valid_modes else MappingMode.BOOLEAN_MIRROR)
-
-        if not valid_modes:
-            return self.async_show_form(
-                step_id="mode",
-                data_schema=vol.Schema({}),
-                errors={"base": "no_valid_modes"},
-            )
-
-        if user_input is not None:
-            mode = user_input["mode"]
+            source_domain = _get_entity_domain(user_input.get("source_entity", ""))
+            target_domain = _get_entity_domain(user_input.get("target_entity", ""))
+            mode = user_input.get("mode", "")
             err = _validate_mode_compat(source_domain, target_domain, mode)
             if err:
                 errors["mode"] = err
+                defaults = dict(user_input)
+                valid_modes = _get_valid_modes(source_domain, target_domain)
+                if valid_modes:
+                    mode_options = [
+                        selector.SelectOptionDict(value=m, label=m.replace("_", " ").title())
+                        for m in valid_modes
+                    ]
             else:
-                self._form_data["mode"] = mode
+                self._form_data = {
+                    "id": self._entry.data.get("id", str(uuid.uuid4())),
+                    "name": user_input["name"],
+                    "source_entity": user_input["source_entity"],
+                    "target_entity": user_input["target_entity"],
+                    "direction": user_input.get("direction", Direction.UNIDIRECTIONAL),
+                    "enabled": bool(user_input.get("enabled", True)),
+                    "prevent_loop": bool(user_input.get("prevent_loop", True)),
+                    "retry_delay_seconds": float(user_input.get("retry_delay_seconds", 0)),
+                    "max_retries": int(user_input.get("max_retries", 1)),
+                    "mode": mode,
+                    "debounce_ms": 0,
+                    "throttle_ms": 0,
+                }
                 if mode == MappingMode.NUMERIC_PASSTHROUGH:
                     new_config = {**self._form_data, "transform": {}}
                     self.hass.config_entries.async_update_entry(
                         self._entry, title=new_config["name"], data=new_config
                     )
                     return self.async_create_entry(title=new_config["name"], data={"_v": int(time.time())})
-                # Show transform form directly — avoids unreliable step-chaining
-                existing_transform = self._entry.data.get("transform", {})
-                schema = _transform_schema_for_mode(mode, existing_transform)
-                return self.async_show_form(
-                    step_id="transform",
-                    data_schema=schema,
-                    description_placeholders={"mode_label": mode.replace("_", " ").title()},
-                )
+                return await self.async_step_transform()
 
         return self.async_show_form(
-            step_id="mode",
-            data_schema=_mode_only_schema(valid_modes, mode_default),
-            description_placeholders={
-                "source_domain": source_domain,
-                "target_domain": target_domain,
-            },
+            step_id="init",
+            data_schema=_base_mapping_schema(defaults, mode_options),
             errors=errors,
         )
+
+    async def async_step_mode(
+        self, user_input: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Step 2 (legacy, no longer used — kept for in-flight flows)."""
+        return await self.async_step_transform()
 
     async def async_step_transform(
         self, user_input: dict[str, Any] | None = None
     ) -> dict[str, Any]:
-        """Step 3: handle transform form submission."""
+        """Step 2: handle transform form submission."""
         mode = self._form_data.get("mode", MappingMode.BOOLEAN_MIRROR)
         existing_transform = self._entry.data.get("transform", {})
+        schema = _transform_schema_for_mode(mode, existing_transform)
 
         if user_input is not None:
             new_config = {**self._form_data, "transform": _extract_transform(mode, user_input)}
@@ -428,8 +386,6 @@ class UiEntityMapperOptionsFlow(OptionsFlow):
             )
             return self.async_create_entry(title=new_config["name"], data={"_v": int(time.time())})
 
-        # Fallback: show form if navigated to directly
-        schema = _transform_schema_for_mode(mode, existing_transform)
         return self.async_show_form(
             step_id="transform",
             data_schema=schema,

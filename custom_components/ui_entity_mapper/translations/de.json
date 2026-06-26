@@ -2,33 +2,27 @@
   "config": {
     "step": {
       "user": {
-        "title": "Neue Zuordnung — Grundeinstellungen",
-        "description": "Quell- und Zielentität auswählen. Die verfügbaren Zuordnungsmodi werden automatisch aus den Entity-Domänen ermittelt.",
+        "title": "Neue Zuordnung",
+        "description": "Quell-/Zielentitat und Zuordnungsmodus auswahlen. Alle Modi werden zunachst angezeigt; bei einer inkompatiblen Auswahl werden beim nachsten Versuch nur gultige Modi angeboten.",
         "data": {
           "name": "Name der Zuordnung",
-          "source_entity": "Quellentität",
-          "target_entity": "Zielentität",
+          "source_entity": "Quellentitat",
+          "target_entity": "Zielentitat",
           "direction": "Richtung",
           "enabled": "Aktiviert",
-          "prevent_loop": "Rückkopplungsschleifen verhindern (empfohlen)",
-          "retry_delay_seconds": "Wiederholungsverzögerung in Sekunden (0 = keine Wiederholung)",
-          "max_retries": "Maximale Wiederholungsversuche (0 = keine Wiederholung)"
+          "prevent_loop": "Ruckkopplungsschleifen verhindern (empfohlen)",
+          "retry_delay_seconds": "Wiederholungsverzogenung in Sekunden (0 = keine Wiederholung)",
+          "max_retries": "Maximale Wiederholungsversuche (0 = keine Wiederholung)",
+          "mode": "Zuordnungsmodus"
         },
         "data_description": {
-          "retry_delay_seconds": "Wenn die Zielentität den gewünschten Zustand nicht erreicht, nach dieser Anzahl Sekunden erneut versuchen.",
-          "max_retries": "Maximale Anzahl von Wiederholungsversuchen. 0 deaktiviert Wiederholungen, auch wenn eine Verzögerung gesetzt ist."
-        }
-      },
-      "mode": {
-        "title": "Neue Zuordnung — Modus auswählen",
-        "description": "Quelldomäne: **{source_domain}** -> Zieldomäne: **{target_domain}**. Nur kompatible Modi werden angezeigt.",
-        "data": {
-          "mode": "Zuordnungsmodus"
+          "retry_delay_seconds": "Wenn die Zielentitat den gewunschten Zustand nicht erreicht, nach dieser Anzahl Sekunden erneut versuchen.",
+          "max_retries": "Maximale Anzahl von Wiederholungsversuchen. 0 deaktiviert Wiederholungen."
         }
       },
       "transform": {
-        "title": "Neue Zuordnung — Transformationseinstellungen",
-        "description": "Transformationsparameter für den Modus **{mode_label}** konfigurieren.",
+        "title": "Transformationseinstellungen",
+        "description": "Transformationsparameter fur den Modus **{mode_label}** konfigurieren.",
         "data": {
           "invert": "Ausgabe invertieren",
           "threshold": "Schwellwert",
@@ -36,44 +30,38 @@
           "input_max": "Eingabemaximum",
           "output_min": "Ausgabeminimum",
           "output_max": "Ausgabemaximum",
-          "round": "Auf nächste ganze Zahl runden",
+          "round": "Auf nachste ganze Zahl runden",
           "mirror_brightness": "Helligkeit spiegeln",
           "mirror_color_temp": "Farbe spiegeln (passt sich dem Farbmodus der Quelle an)"
         }
       }
     },
     "error": {
-      "no_valid_modes": "Für die gewählte Quell-/Zielkombination gibt es keine kompatiblen Zuordnungsmodi. Bitte wählen Sie ein anderes Entitätenpaar.",
-      "invalid_source_for_mode": "Die Domäne der Quellentität ist mit dem gewählten Modus nicht kompatibel.",
-      "invalid_target_for_mode": "Die Domäne der Zielentität ist mit dem gewählten Modus nicht kompatibel."
+      "no_valid_modes": "Fur die gewahlte Quell-/Zielkombination gibt es keine kompatiblen Zuordnungsmodi.",
+      "invalid_source_for_mode": "Die Domane der Quellentitat ist mit dem gewahlten Modus nicht kompatibel.",
+      "invalid_target_for_mode": "Die Domane der Zielentitat ist mit dem gewahlten Modus nicht kompatibel."
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Zuordnung bearbeiten — Grundeinstellungen",
-        "description": "Quell- und Zielentität, Richtung und Wiederholungseinstellungen ändern.",
+        "title": "Zuordnung bearbeiten",
+        "description": "Einstellungen andern. Bei geanderten Entitaten bitte einen kompatiblen Modus neu auswahlen.",
         "data": {
           "name": "Name der Zuordnung",
-          "source_entity": "Quellentität",
-          "target_entity": "Zielentität",
+          "source_entity": "Quellentitat",
+          "target_entity": "Zielentitat",
           "direction": "Richtung",
           "enabled": "Aktiviert",
-          "prevent_loop": "Rückkopplungsschleifen verhindern",
-          "retry_delay_seconds": "Wiederholungsverzögerung in Sekunden (0 = keine Wiederholung)",
-          "max_retries": "Maximale Wiederholungsversuche (0 = keine Wiederholung)"
-        }
-      },
-      "mode": {
-        "title": "Zuordnung bearbeiten — Modus auswählen",
-        "description": "Quelldomäne: **{source_domain}** -> Zieldomäne: **{target_domain}**.",
-        "data": {
+          "prevent_loop": "Ruckkopplungsschleifen verhindern",
+          "retry_delay_seconds": "Wiederholungsverzogenung in Sekunden (0 = keine Wiederholung)",
+          "max_retries": "Maximale Wiederholungsversuche (0 = keine Wiederholung)",
           "mode": "Zuordnungsmodus"
         }
       },
       "transform": {
-        "title": "Zuordnung bearbeiten — Transformationseinstellungen",
-        "description": "Transformationsparameter für den Modus **{mode_label}** konfigurieren.",
+        "title": "Transformationseinstellungen",
+        "description": "Transformationsparameter fur den Modus **{mode_label}** konfigurieren.",
         "data": {
           "invert": "Ausgabe invertieren",
           "threshold": "Schwellwert",
@@ -81,94 +69,46 @@
           "input_max": "Eingabemaximum",
           "output_min": "Ausgabeminimum",
           "output_max": "Ausgabemaximum",
-          "round": "Auf nächste ganze Zahl runden",
+          "round": "Auf nachste ganze Zahl runden",
           "mirror_brightness": "Helligkeit spiegeln",
           "mirror_color_temp": "Farbe spiegeln (passt sich dem Farbmodus der Quelle an)"
         }
       }
     },
     "error": {
-      "no_valid_modes": "Für die gewählte Quell-/Zielkombination gibt es keine kompatiblen Zuordnungsmodi. Bitte wählen Sie ein anderes Entitätenpaar.",
-      "invalid_source_for_mode": "Die Domäne der Quellentität ist mit dem gewählten Modus nicht kompatibel.",
-      "invalid_target_for_mode": "Die Domäne der Zielentität ist mit dem gewählten Modus nicht kompatibel."
+      "no_valid_modes": "Fur die gewahlte Quell-/Zielkombination gibt es keine kompatiblen Zuordnungsmodi.",
+      "invalid_source_for_mode": "Die Domane der Quellentitat ist mit dem gewahlten Modus nicht kompatibel.",
+      "invalid_target_for_mode": "Die Domane der Zielentitat ist mit dem gewahlten Modus nicht kompatibel."
     }
   },
   "entity": {
-    "switch": {
-      "mapping_enabled": {
-        "name": "Aktiviert"
-      }
-    },
+    "switch": { "mapping_enabled": { "name": "Aktiviert" } },
     "sensor": {
-      "mapping_last_result": {
-        "name": "Letztes Ergebnis"
-      },
-      "mapping_success_count": {
-        "name": "Erfolge"
-      },
-      "mapping_failure_count": {
-        "name": "Fehler"
-      }
+      "mapping_last_result": { "name": "Letztes Ergebnis" },
+      "mapping_success_count": { "name": "Erfolge" },
+      "mapping_failure_count": { "name": "Fehler" }
     },
-    "text": {
-      "mapping_last_error": {
-        "name": "Letzter Fehler"
-      }
-    },
-    "button": {
-      "mapping_run_once": {
-        "name": "Einmal ausführen"
-      }
-    }
+    "text": { "mapping_last_error": { "name": "Letzter Fehler" } },
+    "button": { "mapping_run_once": { "name": "Einmal ausfuhren" } }
   },
   "services": {
-    "reload": {
-      "name": "Neu laden",
-      "description": "Integration neu laden und alle Zuordnungskonfigurationen neu einlesen."
-    },
+    "reload": { "name": "Neu laden", "description": "Integration neu laden." },
     "enable_mapping": {
-      "name": "Zuordnung aktivieren",
-      "description": "Eine Zuordnung anhand ihrer eindeutigen ID aktivieren.",
-      "fields": {
-        "mapping_id": {
-          "name": "Zuordnungs-ID",
-          "description": "Die UUID der zu aktivierenden Zuordnung."
-        }
-      }
+      "name": "Zuordnung aktivieren", "description": "Eine Zuordnung anhand ihrer ID aktivieren.",
+      "fields": { "mapping_id": { "name": "Zuordnungs-ID", "description": "Die UUID der zu aktivierenden Zuordnung." } }
     },
     "disable_mapping": {
-      "name": "Zuordnung deaktivieren",
-      "description": "Eine Zuordnung anhand ihrer eindeutigen ID deaktivieren. Ausstehende Wiederholungsversuche werden abgebrochen.",
-      "fields": {
-        "mapping_id": {
-          "name": "Zuordnungs-ID",
-          "description": "Die UUID der zu deaktivierenden Zuordnung."
-        }
-      }
+      "name": "Zuordnung deaktivieren", "description": "Eine Zuordnung anhand ihrer ID deaktivieren.",
+      "fields": { "mapping_id": { "name": "Zuordnungs-ID", "description": "Die UUID der zu deaktivierenden Zuordnung." } }
     },
     "run_mapping_once": {
-      "name": "Zuordnung einmal ausführen",
-      "description": "Eine Zuordnung manuell mit dem aktuellen Zustand der Quellentität ausführen.",
-      "fields": {
-        "mapping_id": {
-          "name": "Zuordnungs-ID",
-          "description": "Die UUID der auszuführenden Zuordnung."
-        }
-      }
+      "name": "Zuordnung einmal ausfuhren", "description": "Eine Zuordnung manuell ausfuhren.",
+      "fields": { "mapping_id": { "name": "Zuordnungs-ID", "description": "Die UUID der auszufuhrenden Zuordnung." } }
     },
-    "export_mappings": {
-      "name": "Zuordnungen exportieren",
-      "description": "Alle Zuordnungskonfigurationen als JSON-serialisierbares Service-Ergebnis zurückgeben."
-    },
+    "export_mappings": { "name": "Zuordnungen exportieren", "description": "Alle Zuordnungskonfigurationen zuruckgeben." },
     "import_mappings": {
-      "name": "Zuordnungen importieren",
-      "description": "Eine oder mehrere Zuordnungskonfigurationen aus einer Liste importieren.",
-      "fields": {
-        "mappings": {
-          "name": "Zuordnungen",
-          "description": "Liste der zu importierenden Zuordnungskonfigurationsobjekte."
-        }
-      }
+      "name": "Zuordnungen importieren", "description": "Zuordnungskonfigurationen importieren.",
+      "fields": { "mappings": { "name": "Zuordnungen", "description": "Liste der zu importierenden Zuordnungsobjekte." } }
     }
   }
 }

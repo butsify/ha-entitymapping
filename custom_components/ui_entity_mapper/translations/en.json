@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "New Mapping — Basic Settings",
-        "description": "Select the source and target entities. The available mapping modes are determined automatically from the entity domains.",
+        "title": "New Mapping",
+        "description": "Select source/target entities and a mapping mode. All modes are shown initially; if you pick an incompatible combination the form will show only valid modes after the first error.",
         "data": {
           "name": "Mapping name",
           "source_entity": "Source entity",
@@ -12,22 +12,16 @@
           "enabled": "Enabled",
           "prevent_loop": "Prevent feedback loops (recommended)",
           "retry_delay_seconds": "Retry delay in seconds (0 = no retry)",
-          "max_retries": "Maximum retry attempts (0 = no retry)"
+          "max_retries": "Maximum retry attempts (0 = no retry)",
+          "mode": "Mapping mode"
         },
         "data_description": {
           "retry_delay_seconds": "If the target does not reach the desired state, retry after this many seconds.",
           "max_retries": "Maximum number of retry attempts. 0 disables retries even if a delay is set."
         }
       },
-      "mode": {
-        "title": "New Mapping — Select Mode",
-        "description": "Source domain: **{source_domain}** -> Target domain: **{target_domain}**. Only compatible modes are shown.",
-        "data": {
-          "mode": "Mapping mode"
-        }
-      },
       "transform": {
-        "title": "New Mapping — Transform Settings",
+        "title": "Transform Settings",
         "description": "Configure the transform parameters for **{mode_label}** mode.",
         "data": {
           "invert": "Invert output",
@@ -51,8 +45,8 @@
   "options": {
     "step": {
       "init": {
-        "title": "Edit Mapping — Basic Settings",
-        "description": "Modify the source and target entities, direction, and retry settings.",
+        "title": "Edit Mapping",
+        "description": "Modify settings. If you change the entities, re-select a compatible mode.",
         "data": {
           "name": "Mapping name",
           "source_entity": "Source entity",
@@ -61,18 +55,12 @@
           "enabled": "Enabled",
           "prevent_loop": "Prevent feedback loops",
           "retry_delay_seconds": "Retry delay in seconds (0 = no retry)",
-          "max_retries": "Maximum retry attempts (0 = no retry)"
-        }
-      },
-      "mode": {
-        "title": "Edit Mapping — Select Mode",
-        "description": "Source domain: **{source_domain}** -> Target domain: **{target_domain}**.",
-        "data": {
+          "max_retries": "Maximum retry attempts (0 = no retry)",
           "mode": "Mapping mode"
         }
       },
       "transform": {
-        "title": "Edit Mapping — Transform Settings",
+        "title": "Transform Settings",
         "description": "Configure the transform parameters for **{mode_label}** mode.",
         "data": {
           "invert": "Invert output",
@@ -94,81 +82,33 @@
     }
   },
   "entity": {
-    "switch": {
-      "mapping_enabled": {
-        "name": "Enabled"
-      }
-    },
+    "switch": { "mapping_enabled": { "name": "Enabled" } },
     "sensor": {
-      "mapping_last_result": {
-        "name": "Last Result"
-      },
-      "mapping_success_count": {
-        "name": "Success Count"
-      },
-      "mapping_failure_count": {
-        "name": "Failure Count"
-      }
+      "mapping_last_result": { "name": "Last Result" },
+      "mapping_success_count": { "name": "Success Count" },
+      "mapping_failure_count": { "name": "Failure Count" }
     },
-    "text": {
-      "mapping_last_error": {
-        "name": "Last Error"
-      }
-    },
-    "button": {
-      "mapping_run_once": {
-        "name": "Run Once"
-      }
-    }
+    "text": { "mapping_last_error": { "name": "Last Error" } },
+    "button": { "mapping_run_once": { "name": "Run Once" } }
   },
   "services": {
-    "reload": {
-      "name": "Reload",
-      "description": "Reload the UI Entity Mapper integration, re-reading all mapping configurations."
-    },
+    "reload": { "name": "Reload", "description": "Reload the UI Entity Mapper integration." },
     "enable_mapping": {
-      "name": "Enable Mapping",
-      "description": "Enable a mapping by its unique ID.",
-      "fields": {
-        "mapping_id": {
-          "name": "Mapping ID",
-          "description": "The UUID of the mapping to enable."
-        }
-      }
+      "name": "Enable Mapping", "description": "Enable a mapping by its unique ID.",
+      "fields": { "mapping_id": { "name": "Mapping ID", "description": "The UUID of the mapping to enable." } }
     },
     "disable_mapping": {
-      "name": "Disable Mapping",
-      "description": "Disable a mapping by its unique ID. Pending retries are cancelled.",
-      "fields": {
-        "mapping_id": {
-          "name": "Mapping ID",
-          "description": "The UUID of the mapping to disable."
-        }
-      }
+      "name": "Disable Mapping", "description": "Disable a mapping by its unique ID.",
+      "fields": { "mapping_id": { "name": "Mapping ID", "description": "The UUID of the mapping to disable." } }
     },
     "run_mapping_once": {
-      "name": "Run Mapping Once",
-      "description": "Manually trigger a mapping once using the current source entity state.",
-      "fields": {
-        "mapping_id": {
-          "name": "Mapping ID",
-          "description": "The UUID of the mapping to run."
-        }
-      }
+      "name": "Run Mapping Once", "description": "Manually trigger a mapping once.",
+      "fields": { "mapping_id": { "name": "Mapping ID", "description": "The UUID of the mapping to run." } }
     },
-    "export_mappings": {
-      "name": "Export Mappings",
-      "description": "Return all mapping configurations as a JSON-serialisable service response."
-    },
+    "export_mappings": { "name": "Export Mappings", "description": "Return all mapping configurations as a service response." },
     "import_mappings": {
-      "name": "Import Mappings",
-      "description": "Import one or more mapping configurations from a list.",
-      "fields": {
-        "mappings": {
-          "name": "Mappings",
-          "description": "List of mapping configuration objects to import."
-        }
-      }
+      "name": "Import Mappings", "description": "Import one or more mapping configurations.",
+      "fields": { "mappings": { "name": "Mappings", "description": "List of mapping configuration objects to import." } }
     }
   }
 }
