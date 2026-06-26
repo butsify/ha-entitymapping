@@ -63,8 +63,8 @@ class MappingEnabledSwitch(SwitchEntity):
     @property
     def is_on(self) -> bool:
         """Return True when the mapping is enabled."""
-        mapping = self._manager.storage.get_mapping(self._mapping_id)
-        return bool(mapping["enabled"]) if mapping else False
+        mapping = self._manager.get_mapping()
+        return bool(mapping.get("enabled", True))
 
     # ------------------------------------------------------------------
     # Actions

@@ -1,4 +1,4 @@
-﻿"""UI Entity Mapper â€” integration entry point.
+﻿"""UI Entity Mapper - integration entry point.
 
 Each config entry represents one mapping. Responsibilities:
   - Create / tear down MappingManager on config-entry setup / unload.
@@ -59,7 +59,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def _async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Options-update listener â€” reload the config entry."""
+    """Options-update listener - reload the config entry."""
     await hass.config_entries.async_reload(entry.entry_id)
 
 
@@ -99,7 +99,7 @@ def _find_manager(hass: HomeAssistant, mapping_id: str) -> MappingManager | None
 
 
 def _async_register_services(hass: HomeAssistant) -> None:
-    """Register all ui_entity_mapper services (idempotent â€” skips if already done)."""
+    """Register all ui_entity_mapper services (idempotent - skips if already done)."""
     if hass.services.has_service(DOMAIN, "reload"):
         return
 

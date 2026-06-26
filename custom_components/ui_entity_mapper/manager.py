@@ -14,7 +14,7 @@ import asyncio
 import logging
 import time
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from homeassistant.core import Event, HomeAssistant, callback
@@ -142,11 +142,11 @@ class MappingManager:
         if new_state is None or new_state.state in ("unknown", "unavailable"):
             return
 
-        for mapping in [self.get_mapping()]:
-            if mapping["source_entity"] == entity_id:
-                self.hass.async_create_task(
-                    self._process_mapping(mapping, new_state, reverse=False)
-                )
+        mapping = self.get_mapping()
+        if mapping["source_entity"] == entity_id:
+            self.hass.async_create_task(
+                self._process_mapping(mapping, new_state, reverse=False)
+            )
 
     @callback
     def _on_target_state_changed(self, event: Event) -> None:
@@ -157,14 +157,14 @@ class MappingManager:
         if new_state is None or new_state.state in ("unknown", "unavailable"):
             return
 
-        for mapping in [self.get_mapping()]:
-            if (
-                mapping["target_entity"] == entity_id
-                and mapping["direction"] == Direction.BIDIRECTIONAL
-            ):
-                self.hass.async_create_task(
-                    self._process_mapping(mapping, new_state, reverse=True)
-                )
+        mapping = self.get_mapping()
+        if (
+            mapping["target_entity"] == entity_id
+            and mapping["direction"] == Direction.BIDIRECTIONAL
+        ):
+            self.hass.async_create_task(
+                self._process_mapping(mapping, new_state, reverse=True)
+            )
 
     # ------------------------------------------------------------------
     # Core mapping processing
