@@ -121,82 +121,88 @@ def _base_mapping_schema(defaults: dict[str, Any]) -> vol.Schema:
     )
 
 
-def _mode_transform_schema(
-    valid_modes: list[str], defaults: dict[str, Any]
-) -> vol.Schema:
-    """Build the schema for step 2 (mode + transform parameters)."""
+def _mode_only_schema(valid_modes: list[str], mode_default: str) -> vol.Schema:
+    """Build the schema for the mode-selection step (mode selector only)."""
     mode_options = [
-        selector.SelectOptionDict(
-            value=m, label=m.replace("_", " ").title()
-        )
+        selector.SelectOptionDict(value=m, label=m.replace("_", " ").title())
         for m in valid_modes
     ]
     return vol.Schema(
         {
-            vol.Required(
-                "mode", default=defaults.get("mode", valid_modes[0])
-            ): selector.SelectSelector(
+            vol.Required("mode", default=mode_default): selector.SelectSelector(
                 selector.SelectSelectorConfig(
                     options=mode_options,
                     mode=selector.SelectSelectorMode.LIST,
                 )
             ),
-            vol.Optional(
-                "threshold", default=defaults.get("threshold", 50.0)
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=-999999, max=999999, step=0.1,
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Optional(
-                "input_min", default=defaults.get("input_min", 0.0)
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=-999999, max=999999, step=0.1,
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Optional(
-                "input_max", default=defaults.get("input_max", 100.0)
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=-999999, max=999999, step=0.1,
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Optional(
-                "output_min", default=defaults.get("output_min", 0.0)
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=-999999, max=999999, step=0.1,
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Optional(
-                "output_max", default=defaults.get("output_max", 100.0)
-            ): selector.NumberSelector(
-                selector.NumberSelectorConfig(
-                    min=-999999, max=999999, step=0.1,
-                    mode=selector.NumberSelectorMode.BOX,
-                )
-            ),
-            vol.Optional(
-                "invert", default=defaults.get("invert", False)
-            ): selector.BooleanSelector(),
-            vol.Optional(
-                "round", default=defaults.get("round", False)
-            ): selector.BooleanSelector(),
-            vol.Optional(
-                "mirror_brightness",
-                default=defaults.get("mirror_brightness", True),
-            ): selector.BooleanSelector(),
-            vol.Optional(
-                "mirror_color_temp",
-                default=defaults.get("mirror_color_temp", False),
-            ): selector.BooleanSelector(),
         }
     )
+
+
+def _transform_schema_for_mode(mode: str, defaults: dict[str, Any]) -> vol.Schema | None:
+    """Return the transform schema for a given mode, or None if no transform is needed."""
+    ns = selector.NumberSelectorConfig(
+        min=-999999, max=999999, step=0.1, mode=selector.NumberSelectorMode.BOX
+    )
+    if mode == MappingMode.NUMERIC_PASSTHROUGH:
+        return None
+    if mode == MappingMode.BOOLEAN_MIRROR:
+        return vol.Schema(
+            {
+                vol.Optional("invert", default=defaults.get("invert", False)): selector.BooleanSelector(),
+            }
+        )
+    if mode == MappingMode.NUMERIC_THRESHOLD:
+        return vol.Schema(
+            {
+                vol.Required("threshold", default=defaults.get("threshold", 50.0)): selector.NumberSelector(ns),
+            }
+        )
+    if mode == MappingMode.NUMERIC_SCALED:
+        return vol.Schema(
+            {
+                vol.Required("input_min", default=defaults.get("input_min", 0.0)): selector.NumberSelector(ns),
+                vol.Required("input_max", default=defaults.get("input_max", 100.0)): selector.NumberSelector(ns),
+                vol.Required("output_min", default=defaults.get("output_min", 0.0)): selector.NumberSelector(ns),
+                vol.Required("output_max", default=defaults.get("output_max", 100.0)): selector.NumberSelector(ns),
+                vol.Optional("invert", default=defaults.get("invert", False)): selector.BooleanSelector(),
+                vol.Optional("round", default=defaults.get("round", False)): selector.BooleanSelector(),
+            }
+        )
+    if mode == MappingMode.LIGHT_MIRROR:
+        return vol.Schema(
+            {
+                vol.Optional("mirror_brightness", default=defaults.get("mirror_brightness", True)): selector.BooleanSelector(),
+                vol.Optional("mirror_color_temp", default=defaults.get("mirror_color_temp", False)): selector.BooleanSelector(),
+            }
+        )
+    return None
+
+
+def _extract_transform(mode: str, user_input: dict[str, Any]) -> dict[str, Any]:
+    """Extract only the relevant transform fields for the given mode."""
+    if mode == MappingMode.BOOLEAN_MIRROR:
+        return {"invert": bool(user_input.get("invert", False))}
+    if mode == MappingMode.NUMERIC_PASSTHROUGH:
+        return {}
+    if mode == MappingMode.NUMERIC_THRESHOLD:
+        return {"threshold": float(user_input.get("threshold", 50.0))}
+    if mode == MappingMode.NUMERIC_SCALED:
+        return {
+            "input_min": float(user_input.get("input_min", 0.0)),
+            "input_max": float(user_input.get("input_max", 100.0)),
+            "output_min": float(user_input.get("output_min", 0.0)),
+            "output_max": float(user_input.get("output_max", 100.0)),
+            "invert": bool(user_input.get("invert", False)),
+            "round": bool(user_input.get("round", False)),
+        }
+    if mode == MappingMode.LIGHT_MIRROR:
+        return {
+            "mirror_brightness": bool(user_input.get("mirror_brightness", True)),
+            "mirror_color_temp": bool(user_input.get("mirror_color_temp", False)),
+        }
+    return {}
+
 
 
 # ---------------------------------------------------------------------------
@@ -248,7 +254,7 @@ class UiEntityMapperConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_mode(
         self, user_input: dict[str, Any] | None = None
     ) -> dict[str, Any]:
-        """Step 2: select mode and transform parameters."""
+        """Step 2: select the mapping mode."""
         errors: dict[str, str] = {}
         source_domain = _get_entity_domain(self._form_data.get("source_entity", ""))
         target_domain = _get_entity_domain(self._form_data.get("target_entity", ""))
@@ -262,33 +268,42 @@ class UiEntityMapperConfigFlow(ConfigFlow, domain=DOMAIN):
             )
 
         if user_input is not None:
-            mode = user_input.get("mode", valid_modes[0])
+            mode = user_input["mode"]
             err = _validate_mode_compat(source_domain, target_domain, mode)
             if err:
                 errors["mode"] = err
             else:
-                transform = {
-                    "threshold": float(user_input.get("threshold", 50.0)),
-                    "input_min": float(user_input.get("input_min", 0.0)),
-                    "input_max": float(user_input.get("input_max", 100.0)),
-                    "output_min": float(user_input.get("output_min", 0.0)),
-                    "output_max": float(user_input.get("output_max", 100.0)),
-                    "invert": bool(user_input.get("invert", False)),
-                    "round": bool(user_input.get("round", False)),
-                    "mirror_brightness": bool(user_input.get("mirror_brightness", True)),
-                    "mirror_color_temp": bool(user_input.get("mirror_color_temp", False)),
-                }
-                full_config = {**self._form_data, "mode": mode, "transform": transform}
-                return self.async_create_entry(title=full_config["name"], data=full_config)
+                self._form_data["mode"] = mode
+                if mode == MappingMode.NUMERIC_PASSTHROUGH:
+                    full_config = {**self._form_data, "transform": {}}
+                    return self.async_create_entry(title=full_config["name"], data=full_config)
+                return await self.async_step_transform()
 
         return self.async_show_form(
             step_id="mode",
-            data_schema=_mode_transform_schema(valid_modes, {}),
+            data_schema=_mode_only_schema(valid_modes, valid_modes[0]),
             description_placeholders={
                 "source_domain": source_domain,
                 "target_domain": target_domain,
             },
             errors=errors,
+        )
+
+    async def async_step_transform(
+        self, user_input: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Step 3: configure mode-specific transform parameters."""
+        mode = self._form_data.get("mode", MappingMode.BOOLEAN_MIRROR)
+        schema = _transform_schema_for_mode(mode, {})
+
+        if user_input is not None:
+            full_config = {**self._form_data, "transform": _extract_transform(mode, user_input)}
+            return self.async_create_entry(title=full_config["name"], data=full_config)
+
+        return self.async_show_form(
+            step_id="transform",
+            data_schema=schema,
+            description_placeholders={"mode_label": mode.replace("_", " ").title()},
         )
 
     async def async_step_import(
@@ -346,27 +361,12 @@ class UiEntityMapperOptionsFlow(OptionsFlow):
     async def async_step_mode(
         self, user_input: dict[str, Any] | None = None
     ) -> dict[str, Any]:
-        """Step 2: edit mode and transform parameters (pre-filled from entry.data)."""
+        """Step 2: select mapping mode (pre-filled from entry.data)."""
         errors: dict[str, str] = {}
         source_domain = _get_entity_domain(self._form_data.get("source_entity", ""))
         target_domain = _get_entity_domain(self._form_data.get("target_entity", ""))
         valid_modes = _get_valid_modes(source_domain, target_domain)
-
-        existing_transform = self._entry.data.get("transform", {})
-        transform_defaults: dict[str, Any] = {
-            "mode": self._entry.data.get(
-                "mode", valid_modes[0] if valid_modes else "boolean_mirror"
-            ),
-            "threshold": float(existing_transform.get("threshold", 50.0)),
-            "input_min": float(existing_transform.get("input_min", 0.0)),
-            "input_max": float(existing_transform.get("input_max", 100.0)),
-            "output_min": float(existing_transform.get("output_min", 0.0)),
-            "output_max": float(existing_transform.get("output_max", 100.0)),
-            "invert": bool(existing_transform.get("invert", False)),
-            "round": bool(existing_transform.get("round", False)),
-            "mirror_brightness": bool(existing_transform.get("mirror_brightness", True)),
-            "mirror_color_temp": bool(existing_transform.get("mirror_color_temp", False)),
-        }
+        mode_default = self._entry.data.get("mode", valid_modes[0] if valid_modes else MappingMode.BOOLEAN_MIRROR)
 
         if not valid_modes:
             return self.async_show_form(
@@ -376,39 +376,49 @@ class UiEntityMapperOptionsFlow(OptionsFlow):
             )
 
         if user_input is not None:
-            mode = user_input.get("mode", valid_modes[0])
+            mode = user_input["mode"]
             err = _validate_mode_compat(source_domain, target_domain, mode)
             if err:
                 errors["mode"] = err
             else:
-                transform = {
-                    "threshold": float(user_input.get("threshold", 50.0)),
-                    "input_min": float(user_input.get("input_min", 0.0)),
-                    "input_max": float(user_input.get("input_max", 100.0)),
-                    "output_min": float(user_input.get("output_min", 0.0)),
-                    "output_max": float(user_input.get("output_max", 100.0)),
-                    "invert": bool(user_input.get("invert", False)),
-                    "round": bool(user_input.get("round", False)),
-                    "mirror_brightness": bool(user_input.get("mirror_brightness", True)),
-                    "mirror_color_temp": bool(user_input.get("mirror_color_temp", False)),
-                }
-                new_config = {**self._form_data, "mode": mode, "transform": transform}
-                self.hass.config_entries.async_update_entry(
-                    self._entry,
-                    title=new_config["name"],
-                    data=new_config,
-                )
-                return self.async_create_entry(
-                    title=new_config["name"], data={"_v": int(time.time())}
-                )
+                self._form_data["mode"] = mode
+                if mode == MappingMode.NUMERIC_PASSTHROUGH:
+                    new_config = {**self._form_data, "transform": {}}
+                    self.hass.config_entries.async_update_entry(
+                        self._entry, title=new_config["name"], data=new_config
+                    )
+                    return self.async_create_entry(title=new_config["name"], data={"_v": int(time.time())})
+                return await self.async_step_transform()
 
         return self.async_show_form(
             step_id="mode",
-            data_schema=_mode_transform_schema(valid_modes, transform_defaults),
+            data_schema=_mode_only_schema(valid_modes, mode_default),
             description_placeholders={
                 "source_domain": source_domain,
                 "target_domain": target_domain,
             },
             errors=errors,
         )
+
+    async def async_step_transform(
+        self, user_input: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Step 3: configure mode-specific transform parameters (pre-filled from entry.data)."""
+        mode = self._form_data.get("mode", MappingMode.BOOLEAN_MIRROR)
+        existing_transform = self._entry.data.get("transform", {})
+        schema = _transform_schema_for_mode(mode, existing_transform)
+
+        if user_input is not None:
+            new_config = {**self._form_data, "transform": _extract_transform(mode, user_input)}
+            self.hass.config_entries.async_update_entry(
+                self._entry, title=new_config["name"], data=new_config
+            )
+            return self.async_create_entry(title=new_config["name"], data={"_v": int(time.time())})
+
+        return self.async_show_form(
+            step_id="transform",
+            data_schema=schema,
+            description_placeholders={"mode_label": mode.replace("_", " ").title()},
+        )
+
 

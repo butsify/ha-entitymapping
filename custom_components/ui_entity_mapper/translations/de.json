@@ -20,19 +20,25 @@
         }
       },
       "mode": {
-        "title": "Neue Zuordnung — Modus & Transformation",
-        "description": "Quelldomäne: **{source_domain}** → Zieldomäne: **{target_domain}**. Nur kompatible Modi werden angezeigt.",
+        "title": "Neue Zuordnung — Modus auswählen",
+        "description": "Quelldomäne: **{source_domain}** -> Zieldomäne: **{target_domain}**. Nur kompatible Modi werden angezeigt.",
         "data": {
-          "mode": "Zuordnungsmodus",
-          "threshold": "Schwellwert (numerischer Schwellwertmodus)",
-          "input_min": "Eingabeminimum (Skalierung)",
-          "input_max": "Eingabemaximum (Skalierung)",
-          "output_min": "Ausgabeminimum (Skalierung)",
-          "output_max": "Ausgabemaximum (Skalierung)",
+          "mode": "Zuordnungsmodus"
+        }
+      },
+      "transform": {
+        "title": "Neue Zuordnung — Transformationseinstellungen",
+        "description": "Transformationsparameter für den Modus **{mode_label}** konfigurieren.",
+        "data": {
           "invert": "Ausgabe invertieren",
+          "threshold": "Schwellwert",
+          "input_min": "Eingabeminimum",
+          "input_max": "Eingabemaximum",
+          "output_min": "Ausgabeminimum",
+          "output_max": "Ausgabemaximum",
           "round": "Auf nächste ganze Zahl runden",
-          "mirror_brightness": "Helligkeit spiegeln (Lichtspiegel)",
-          "mirror_color_temp": "Farbtemperatur spiegeln (Lichtspiegel)"
+          "mirror_brightness": "Helligkeit spiegeln",
+          "mirror_color_temp": "Farbe spiegeln (passt sich dem Farbmodus der Quelle an)"
         }
       }
     },
@@ -59,19 +65,25 @@
         }
       },
       "mode": {
-        "title": "Zuordnung bearbeiten — Modus & Transformation",
-        "description": "Quelldomäne: **{source_domain}** → Zieldomäne: **{target_domain}**.",
+        "title": "Zuordnung bearbeiten — Modus auswählen",
+        "description": "Quelldomäne: **{source_domain}** -> Zieldomäne: **{target_domain}**.",
         "data": {
-          "mode": "Zuordnungsmodus",
-          "threshold": "Schwellwert (numerischer Schwellwertmodus)",
-          "input_min": "Eingabeminimum (Skalierung)",
-          "input_max": "Eingabemaximum (Skalierung)",
-          "output_min": "Ausgabeminimum (Skalierung)",
-          "output_max": "Ausgabemaximum (Skalierung)",
+          "mode": "Zuordnungsmodus"
+        }
+      },
+      "transform": {
+        "title": "Zuordnung bearbeiten — Transformationseinstellungen",
+        "description": "Transformationsparameter für den Modus **{mode_label}** konfigurieren.",
+        "data": {
           "invert": "Ausgabe invertieren",
+          "threshold": "Schwellwert",
+          "input_min": "Eingabeminimum",
+          "input_max": "Eingabemaximum",
+          "output_min": "Ausgabeminimum",
+          "output_max": "Ausgabemaximum",
           "round": "Auf nächste ganze Zahl runden",
-          "mirror_brightness": "Helligkeit spiegeln (Lichtspiegel)",
-          "mirror_color_temp": "Farbtemperatur spiegeln (Lichtspiegel)"
+          "mirror_brightness": "Helligkeit spiegeln",
+          "mirror_color_temp": "Farbe spiegeln (passt sich dem Farbmodus der Quelle an)"
         }
       }
     },

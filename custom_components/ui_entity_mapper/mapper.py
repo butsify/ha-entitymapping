@@ -8,7 +8,15 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any
 
-from homeassistant.components.light import ATTR_BRIGHTNESS, ATTR_COLOR_TEMP_KELVIN
+from homeassistant.components.light import (
+    ATTR_BRIGHTNESS,
+    ATTR_COLOR_MODE,
+    ATTR_COLOR_TEMP_KELVIN,
+    ATTR_HS_COLOR,
+    ATTR_RGB_COLOR,
+    ATTR_XY_COLOR,
+    ColorMode,
+)
 
 from .const import MappingMode
 from .storage import TransformConfig
@@ -231,9 +239,24 @@ def compute_light_mirror_call(
             data[ATTR_BRIGHTNESS] = int(brightness)
 
     if transform.get("mirror_color_temp", False):
-        color_temp = attrs.get(ATTR_COLOR_TEMP_KELVIN)
-        if color_temp is not None:
-            data[ATTR_COLOR_TEMP_KELVIN] = int(color_temp)
+        color_mode = attrs.get(ATTR_COLOR_MODE)
+        if color_mode == ColorMode.COLOR_TEMP:
+            color_temp = attrs.get(ATTR_COLOR_TEMP_KELVIN)
+            if color_temp is not None:
+                data[ATTR_COLOR_TEMP_KELVIN] = int(color_temp)
+        elif color_mode in (ColorMode.RGB, ColorMode.RGBW, ColorMode.RGBWW):
+            rgb = attrs.get(ATTR_RGB_COLOR)
+            if rgb is not None:
+                data[ATTR_RGB_COLOR] = rgb
+        elif color_mode == ColorMode.XY:
+            xy = attrs.get(ATTR_XY_COLOR)
+            if xy is not None:
+                data[ATTR_XY_COLOR] = xy
+        else:
+            # HS and other modes
+            hs = attrs.get(ATTR_HS_COLOR)
+            if hs is not None:
+                data[ATTR_HS_COLOR] = hs
 
     return ("light", "turn_on", data)
 

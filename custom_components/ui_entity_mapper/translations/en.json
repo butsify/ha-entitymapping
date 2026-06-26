@@ -20,19 +20,25 @@
         }
       },
       "mode": {
-        "title": "New Mapping — Mode & Transform",
-        "description": "Source domain: **{source_domain}** → Target domain: **{target_domain}**. Only compatible modes are shown.",
+        "title": "New Mapping — Select Mode",
+        "description": "Source domain: **{source_domain}** -> Target domain: **{target_domain}**. Only compatible modes are shown.",
         "data": {
-          "mode": "Mapping mode",
-          "threshold": "Threshold (numeric threshold mode)",
-          "input_min": "Input minimum (scaling)",
-          "input_max": "Input maximum (scaling)",
-          "output_min": "Output minimum (scaling)",
-          "output_max": "Output maximum (scaling)",
+          "mode": "Mapping mode"
+        }
+      },
+      "transform": {
+        "title": "New Mapping — Transform Settings",
+        "description": "Configure the transform parameters for **{mode_label}** mode.",
+        "data": {
           "invert": "Invert output",
+          "threshold": "Threshold",
+          "input_min": "Input minimum",
+          "input_max": "Input maximum",
+          "output_min": "Output minimum",
+          "output_max": "Output maximum",
           "round": "Round to nearest integer",
-          "mirror_brightness": "Mirror brightness (light mirror)",
-          "mirror_color_temp": "Mirror colour temperature (light mirror)"
+          "mirror_brightness": "Mirror brightness",
+          "mirror_color_temp": "Mirror color (adapts to source color mode)"
         }
       }
     },
@@ -59,19 +65,25 @@
         }
       },
       "mode": {
-        "title": "Edit Mapping — Mode & Transform",
-        "description": "Source domain: **{source_domain}** → Target domain: **{target_domain}**.",
+        "title": "Edit Mapping — Select Mode",
+        "description": "Source domain: **{source_domain}** -> Target domain: **{target_domain}**.",
         "data": {
-          "mode": "Mapping mode",
-          "threshold": "Threshold (numeric threshold mode)",
-          "input_min": "Input minimum (scaling)",
-          "input_max": "Input maximum (scaling)",
-          "output_min": "Output minimum (scaling)",
-          "output_max": "Output maximum (scaling)",
+          "mode": "Mapping mode"
+        }
+      },
+      "transform": {
+        "title": "Edit Mapping — Transform Settings",
+        "description": "Configure the transform parameters for **{mode_label}** mode.",
+        "data": {
           "invert": "Invert output",
+          "threshold": "Threshold",
+          "input_min": "Input minimum",
+          "input_max": "Input maximum",
+          "output_min": "Output minimum",
+          "output_max": "Output maximum",
           "round": "Round to nearest integer",
-          "mirror_brightness": "Mirror brightness (light mirror)",
-          "mirror_color_temp": "Mirror colour temperature (light mirror)"
+          "mirror_brightness": "Mirror brightness",
+          "mirror_color_temp": "Mirror color (adapts to source color mode)"
         }
       }
     },
