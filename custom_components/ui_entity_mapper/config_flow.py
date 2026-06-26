@@ -277,7 +277,13 @@ class UiEntityMapperConfigFlow(ConfigFlow, domain=DOMAIN):
                 if mode == MappingMode.NUMERIC_PASSTHROUGH:
                     full_config = {**self._form_data, "transform": {}}
                     return self.async_create_entry(title=full_config["name"], data=full_config)
-                return await self.async_step_transform()
+                # Show transform form directly — avoids unreliable step-chaining
+                schema = _transform_schema_for_mode(mode, {})
+                return self.async_show_form(
+                    step_id="transform",
+                    data_schema=schema,
+                    description_placeholders={"mode_label": mode.replace("_", " ").title()},
+                )
 
         return self.async_show_form(
             step_id="mode",
@@ -292,14 +298,15 @@ class UiEntityMapperConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_transform(
         self, user_input: dict[str, Any] | None = None
     ) -> dict[str, Any]:
-        """Step 3: configure mode-specific transform parameters."""
+        """Step 3: handle transform form submission."""
         mode = self._form_data.get("mode", MappingMode.BOOLEAN_MIRROR)
-        schema = _transform_schema_for_mode(mode, {})
 
         if user_input is not None:
             full_config = {**self._form_data, "transform": _extract_transform(mode, user_input)}
             return self.async_create_entry(title=full_config["name"], data=full_config)
 
+        # Fallback: show form if navigated to directly
+        schema = _transform_schema_for_mode(mode, {})
         return self.async_show_form(
             step_id="transform",
             data_schema=schema,
@@ -388,7 +395,14 @@ class UiEntityMapperOptionsFlow(OptionsFlow):
                         self._entry, title=new_config["name"], data=new_config
                     )
                     return self.async_create_entry(title=new_config["name"], data={"_v": int(time.time())})
-                return await self.async_step_transform()
+                # Show transform form directly — avoids unreliable step-chaining
+                existing_transform = self._entry.data.get("transform", {})
+                schema = _transform_schema_for_mode(mode, existing_transform)
+                return self.async_show_form(
+                    step_id="transform",
+                    data_schema=schema,
+                    description_placeholders={"mode_label": mode.replace("_", " ").title()},
+                )
 
         return self.async_show_form(
             step_id="mode",
@@ -403,10 +417,9 @@ class UiEntityMapperOptionsFlow(OptionsFlow):
     async def async_step_transform(
         self, user_input: dict[str, Any] | None = None
     ) -> dict[str, Any]:
-        """Step 3: configure mode-specific transform parameters (pre-filled from entry.data)."""
+        """Step 3: handle transform form submission."""
         mode = self._form_data.get("mode", MappingMode.BOOLEAN_MIRROR)
         existing_transform = self._entry.data.get("transform", {})
-        schema = _transform_schema_for_mode(mode, existing_transform)
 
         if user_input is not None:
             new_config = {**self._form_data, "transform": _extract_transform(mode, user_input)}
@@ -415,6 +428,8 @@ class UiEntityMapperOptionsFlow(OptionsFlow):
             )
             return self.async_create_entry(title=new_config["name"], data={"_v": int(time.time())})
 
+        # Fallback: show form if navigated to directly
+        schema = _transform_schema_for_mode(mode, existing_transform)
         return self.async_show_form(
             step_id="transform",
             data_schema=schema,
