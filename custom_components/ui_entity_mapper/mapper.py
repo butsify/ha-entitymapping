@@ -109,6 +109,9 @@ def compute_service_call(
     if mode == MappingMode.TEXT_PASSTHROUGH:
         return _text_passthrough(source_state, target_entity_id)
 
+    if mode == MappingMode.LOXONE_TEXT_COMMAND:
+        return _loxone_text_command(source_state, target_entity_id)
+
     _LOGGER.warning("Unknown mapping mode: %s", mode)
     return None
 
@@ -147,6 +150,18 @@ def _text_passthrough(
     """Forward the source state string as-is to a text or input_text entity."""
     target_domain = target_entity_id.split(".")[0]
     return (target_domain, "set_value", {"entity_id": target_entity_id, "value": source_state})
+
+
+def _loxone_text_command(
+    source_state: str,
+    target_entity_id: str,
+) -> ServiceCall | None:
+    """Send source state to a Loxone Virtual Text Input via event_websocket_command.
+
+    Uses 'device' (entity_id) so no manual UUID entry is required.
+    PyLoxone resolves the UUID internally from the entity registry.
+    """
+    return ("loxone", "event_websocket_command", {"device": target_entity_id, "value": source_state})
 
 
 def _numeric_passthrough(

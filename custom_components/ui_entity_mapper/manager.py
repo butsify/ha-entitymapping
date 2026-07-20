@@ -348,6 +348,12 @@ class MappingManager:
             expected_text = str(data.get("value", ""))
             return check_text_target_reached(self.hass, target_entity_id, expected_text)
 
+        if mode == MappingMode.LOXONE_TEXT_COMMAND:
+            # Loxone websocket command is fire-and-forget; the sensor state
+            # updates asynchronously from the miniserver — assume reached to
+            # avoid unnecessary retries.
+            return True
+
         return True  # Unknown mode → assume reached
 
     # ------------------------------------------------------------------
