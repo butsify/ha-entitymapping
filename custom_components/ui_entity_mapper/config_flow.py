@@ -137,7 +137,7 @@ def _base_mapping_schema(defaults: dict[str, Any], mode_options: list | None = N
 def _transform_schema_for_mode(mode: str, defaults: dict[str, Any]) -> vol.Schema | None:
     """Return the transform schema for a given mode, or None if no transform is needed."""
     ns = selector.NumberSelectorConfig(
-        min=-999999, max=999999, step=0.1, mode=selector.NumberSelectorMode.BOX
+        min=-1000000000, max=1000000000, step=0.001, mode=selector.NumberSelectorMode.BOX
     )
     if mode == MappingMode.NUMERIC_PASSTHROUGH:
         return None
