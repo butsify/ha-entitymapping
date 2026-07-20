@@ -32,6 +32,7 @@ from .mapper import (
     ServiceCall,
     check_boolean_target_reached,
     check_numeric_target_reached,
+    check_text_target_reached,
     compute_light_mirror_call,
     compute_service_call,
 )
@@ -255,6 +256,17 @@ class MappingManager:
         if call is None:
             _LOGGER.debug("No service call computed for mapping %s (state=%r)",
                           mapping_id, source_state_obj.state)
+            status = self._mapping_status.setdefault(mapping_id, MappingStatus())
+            status.last_result = "failure"
+            status.failure_count += 1
+            status.last_error = (
+                f"Cannot compute service call: state {source_state_obj.state!r} "
+                f"is not valid for mode '{mapping['mode']}'"
+            )
+            async_dispatcher_send(
+                self.hass,
+                SIGNAL_MAPPING_UPDATED.format(mapping_id=mapping_id),
+            )
             return
 
         # Mark the target as written by us *before* the call so the listener
@@ -331,6 +343,10 @@ class MappingManager:
         if mode in (MappingMode.NUMERIC_PASSTHROUGH, MappingMode.NUMERIC_SCALED):
             expected = float(data.get("value", 0))
             return check_numeric_target_reached(self.hass, target_entity_id, expected)
+
+        if mode == MappingMode.TEXT_PASSTHROUGH:
+            expected_text = str(data.get("value", ""))
+            return check_text_target_reached(self.hass, target_entity_id, expected_text)
 
         return True  # Unknown mode → assume reached
 

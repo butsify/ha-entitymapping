@@ -320,7 +320,15 @@ class UiEntityMapperOptionsFlow(OptionsFlow):
         """Step 1: edit base mapping settings + mode (pre-filled from entry.data)."""
         defaults = dict(self._entry.data)
         errors: dict[str, str] = {}
-        mode_options = None  # None = show all modes
+
+        # Pre-filter modes based on the known source/target from entry data
+        src = _get_entity_domain(defaults.get("source_entity", ""))
+        tgt = _get_entity_domain(defaults.get("target_entity", ""))
+        valid_for_current = _get_valid_modes(src, tgt)
+        mode_options: list | None = [
+            selector.SelectOptionDict(value=m, label=m.replace("_", " ").title())
+            for m in valid_for_current
+        ] if valid_for_current else None
 
         if user_input is not None:
             source_domain = _get_entity_domain(user_input.get("source_entity", ""))
@@ -331,11 +339,10 @@ class UiEntityMapperOptionsFlow(OptionsFlow):
                 errors["mode"] = err
                 defaults = dict(user_input)
                 valid_modes = _get_valid_modes(source_domain, target_domain)
-                if valid_modes:
-                    mode_options = [
-                        selector.SelectOptionDict(value=m, label=m.replace("_", " ").title())
-                        for m in valid_modes
-                    ]
+                mode_options = [
+                    selector.SelectOptionDict(value=m, label=m.replace("_", " ").title())
+                    for m in valid_modes
+                ] if valid_modes else None
             else:
                 self._form_data = {
                     "id": self._entry.data.get("id", str(uuid.uuid4())),

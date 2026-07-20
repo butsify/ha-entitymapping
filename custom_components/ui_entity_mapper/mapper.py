@@ -106,6 +106,9 @@ def compute_service_call(
         service = "turn_on" if is_on else "turn_off"
         return ("light", service, {"entity_id": target_entity_id})
 
+    if mode == MappingMode.TEXT_PASSTHROUGH:
+        return _text_passthrough(source_state, target_entity_id)
+
     _LOGGER.warning("Unknown mapping mode: %s", mode)
     return None
 
@@ -135,6 +138,15 @@ def _boolean_mirror(
         service = "lock" if is_on else "unlock"
         return ("lock", service, {"entity_id": target_entity_id})
     return None
+
+
+def _text_passthrough(
+    source_state: str,
+    target_entity_id: str,
+) -> ServiceCall | None:
+    """Forward the source state string as-is to a text or input_text entity."""
+    target_domain = target_entity_id.split(".")[0]
+    return (target_domain, "set_value", {"entity_id": target_entity_id, "value": source_state})
 
 
 def _numeric_passthrough(
@@ -294,3 +306,13 @@ def check_numeric_target_reached(
     except (ValueError, TypeError):
         return False
     return abs(current - expected) <= tolerance
+
+
+def check_text_target_reached(
+    hass: "HomeAssistant", entity_id: str, expected: str
+) -> bool:
+    """Return True if the target text entity's state equals expected."""
+    state = hass.states.get(entity_id)
+    if state is None or state.state in ("unknown", "unavailable"):
+        return False
+    return state.state == expected
